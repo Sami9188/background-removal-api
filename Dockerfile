@@ -18,5 +18,5 @@ COPY main.py .
 # Expose the port (critical for Render to detect)
 EXPOSE 8000
 
-# Use Render’s PORT environment variable
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use shell form to pick up Render’s $PORT
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
