@@ -2,8 +2,8 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import Response
 from rembg import remove
 from fastapi.middleware.cors import CORSMiddleware
-import os  # <-- Add this
-import unicorn
+import os
+import uvicorn  # Corrected import
 
 app = FastAPI()
 
@@ -24,7 +24,6 @@ async def remove_background(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(500, f"Error: {str(e)}")
 
-# Add this block to bind to Render’s PORT
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  # Ensures it binds to the correct port
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
