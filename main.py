@@ -1,29 +1,38 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import Response
+from flask import Flask, request, send_file
 from rembg import remove
-from fastapi.middleware.cors import CORSMiddleware
-import os
-import uvicorn  # Corrected import
+from PIL import Image
+import io
 
-app = FastAPI()
+app = Flask(__name__)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["POST"],
-)
-
-@app.post("/remove-background")
-async def remove_background(file: UploadFile = File(...)):
-    if not file.content_type.startswith('image/'):
-        raise HTTPException(400, "Invalid file type")
+@app.route('/remove-bg', methods=['POST'])
+def remove_bg():
     try:
-        input_image = await file.read()
-        output_image = remove(input_image)
-        return Response(content=output_image, media_type="image/png")
-    except Exception as e:
-        raise HTTPException(500, f"Error: {str(e)}")
+        if 'image' not in request.files:
+            return {"error": "No image uploaded"}, 400
+            
+        file = request.files['image']
+        if file.filename == '':
+            return {"error": "Empty filename"}, 400
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+        # Process image directly from file stream
+        with Image.open(file.stream) as img:
+            output = remove(img)
+            
+        img_bytes = io.BytesIO()
+        output.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+
+        return send_file(
+            img_bytes,
+            mimetype='image/png',
+            as_attachment=True,
+            download_name='background_removed.png'
+        )
+
+    except Exception as e:
+        app.logger.error(f"Error: {str(e)}")
+        return {"error": "Internal server error"}, 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
