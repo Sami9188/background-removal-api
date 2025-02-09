@@ -5,10 +5,9 @@ import io
 
 app = Flask(__name__)
 
-# Define a root route so that GET / returns a proper message.
 @app.route('/')
 def index():
-    return "Welcome to the Background Remover API. Use the /remove-bg endpoint to remove backgrounds."
+    return "Welcome to the Background Remover API. Use the /remove-bg endpoint."
 
 @app.route('/remove-bg', methods=['POST'])
 def remove_bg():
@@ -20,9 +19,9 @@ def remove_bg():
         if file.filename == '':
             return {"error": "Empty filename"}, 400
 
-        # Process image directly from file stream
+        # Process image with rembg
         with Image.open(file.stream) as img:
-            output = remove(img)
+            output = remove(img)  # <-- Background removal happens here
 
         img_bytes = io.BytesIO()
         output.save(img_bytes, format='PNG')
@@ -38,5 +37,6 @@ def remove_bg():
     except Exception as e:
         app.logger.error(f"Error: {str(e)}")
         return {"error": "Internal server error"}, 500
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)  # Turn off debug in production
