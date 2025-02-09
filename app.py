@@ -9,7 +9,7 @@ CORS(app)  # Allow all CORS requests
 
 @app.route('/')
 def index():
-    return "Welcome to the Background Remover API. Use the /remove-bg endpoint."
+    return "Welcome to the Background Remover API. Use the /remove-bg endpoint. v2"
 
 @app.route('/remove-bg', methods=['POST'])
 def remove_bg():
