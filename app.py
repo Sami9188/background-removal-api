@@ -20,9 +20,9 @@ def remove_bg():
         if file.filename == '':
             return {"error": "Empty filename"}, 400
 
-        # Process image directly from file stream
+        # Open the image and just copy it without processing
         with Image.open(file.stream) as img:
-            output = remove(img)
+            output = img.copy()
 
         img_bytes = io.BytesIO()
         output.save(img_bytes, format='PNG')
