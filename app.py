@@ -38,6 +38,5 @@ def remove_bg():
     except Exception as e:
         app.logger.error(f"Error: {str(e)}")
         return {"error": "Internal server error"}, 500
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
