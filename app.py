@@ -5,9 +5,16 @@ import io
 
 app = Flask(__name__)
 
+# This route shows a welcome message when visiting the root URL.
+@app.route('/')
+def index():
+    return "Welcome to the Background Remover API. Use the /remove-bg endpoint to remove backgrounds."
+
+# This route handles POST requests to remove the background from an image.
 @app.route('/remove-bg', methods=['POST'])
 def remove_bg():
     try:
+        # Check if an image was uploaded
         if 'image' not in request.files:
             return {"error": "No image uploaded"}, 400
             
@@ -15,40 +22,18 @@ def remove_bg():
         if file.filename == '':
             return {"error": "Empty filename"}, 400
 
-        # Open the image and just copy it without processing
+        # Open the image file from the upload stream.
         with Image.open(file.stream) as img:
-            output = img.copy()  # Skip the rembg.remove step
+            # To actually remove the background, use the 'remove' function.
+            # If you prefer to simply copy the image (without processing), use img.copy() instead.
+            output = remove(img)  # Change this to img.copy() if you don't want to process the image.
             
+        # Save the processed image into a BytesIO object.
         img_bytes = io.BytesIO()
         output.save(img_bytes, format='PNG')
         img_bytes.seek(0)
 
-        return send_file(
-            img_bytes,
-            mimetype='image/png',
-            as_attachment=True,
-            download_name='background_removed.png'
-        )
-
-    except Exception as e:
-        app.logger.error(f"Error: {str(e)}")
-        return {"error": "Internal server error"}, 500
-    try:
-        if 'image' not in request.files:
-            return {"error": "No image uploaded"}, 400
-            
-        file = request.files['image']
-        if file.filename == '':
-            return {"error": "Empty filename"}, 400
-
-        # Process image directly from file stream
-        with Image.open(file.stream) as img:
-            output = remove(img)
-            
-        img_bytes = io.BytesIO()
-        output.save(img_bytes, format='PNG')
-        img_bytes.seek(0)
-
+        # Send the processed image back as a file download.
         return send_file(
             img_bytes,
             mimetype='image/png',
