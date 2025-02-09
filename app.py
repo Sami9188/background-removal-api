@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file 
+from flask import Flask, request, send_file  
 from rembg import remove
 from PIL import Image
 import io
@@ -24,9 +24,9 @@ def remove_bg():
 
         # Open the image file from the upload stream.
         with Image.open(file.stream) as img:
-            # To actually remove the background, use the 'remove' function.
-            # If you prefer to simply copy the image (without processing), use img.copy() instead.
-            output = remove(img)  # Change this to img.copy() if you don't want to process the image.
+            # Remove the background using the rembg.remove function.
+            # (If you prefer to simply copy the image without processing, you can replace this line with: output = img.copy())
+            output = remove(img)
             
         # Save the processed image into a BytesIO object.
         img_bytes = io.BytesIO()
@@ -46,4 +46,6 @@ def remove_bg():
         return {"error": "Internal server error"}, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Use Waitress for production deployment.
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=5000)
